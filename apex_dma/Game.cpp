@@ -15,8 +15,8 @@ extern int glowtype2;
 float smooth = 100.0f;
 bool aim_no_recoil = true;
 int bone = 2;
-extern float smoothpred;
-extern float smoothpred2;
+float bulletspeed = 0.08;
+float bulletgrav = 0.05;
 extern float veltest;
 
 bool Entity::Observing(uint64_t entitylist)
@@ -252,36 +252,46 @@ bool Entity::isZooming()
 {
 	return *(int*)(buffer + OFFSET_ZOOMING) == 1;
 }
-//custom glow color RGB
-void Entity::enableGlow(GColor color)
+extern uint64_t g_Base;
+extern int settingIndex;
+extern int contextId;
+extern std::array<float, 3> highlightParameter;
+//custom glow colo RGB
+unsigned char outsidevalue = 125;
+extern unsigned char insidevalue;
+extern unsigned char insidevalueItem;
+extern unsigned char outlinesize;
+void Entity::enableGlow()
 {
-	
-	//apex_mem.Write<GlowMode>(ptr + GLOW_TYPE, { 101,102,96,90 });
-	apex_mem.Write<GColor>(ptr + GLOW_COLOR, color);
+	//static const int contextId = 5;
+	//int settingIndex = 44;
+	std::array<unsigned char, 4> highlightFunctionBits = {
+		insidevalue,   // InsideFunction
+		outsidevalue, // OutlineFunction: HIGHLIGHT_OUTLINE_OBJECTIVE
+		outlinesize,  // OutlineRadius: size * 255 / 8
+		64   // (EntityVisible << 6) | State & 0x3F | (AfterPostProcess << 7)
+	};
+	//std::array<float, 3> highlightParameter = { 0, 1, 0 };
+	apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, contextId);
+	apex_mem.Write<unsigned char>(ptr + OFFSET_HIGHLIGHTSERVERACTIVESTATES + contextId, settingIndex);
+	//apex_mem.Write<int>(ptr + 0x298 + contextId, settingIndex);
+	long highlightSettingsPtr;
+	apex_mem.Read<long>(g_Base + HIGHLIGHT_SETTINGS, highlightSettingsPtr);
+    apex_mem.Write<int>(ptr + OFFSET_GLOW_THROUGH_WALLS , 2);
+	apex_mem.Write<typeof(highlightFunctionBits)>(highlightSettingsPtr + HIGHLIGHT_TYPE_SIZE * settingIndex + 4, highlightFunctionBits);
+	apex_mem.Write<typeof(highlightParameter)>(highlightSettingsPtr + HIGHLIGHT_TYPE_SIZE * settingIndex + 8, highlightParameter);
+	apex_mem.Write(g_Base + 0x270 , 1);
+	apex_mem.Write(ptr + 0x270 , 1);
+	//printf("%f\n", deltaTime2);
 
-	
-	
-	
-
-	
-
-	apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE_GLOW_CONTEXT, 1);
-	apex_mem.Write<int>(ptr + OFFSET_GLOW_THROUGH_WALLS_GLOW_VISIBLE_TYPE, 2);
-	
-	//apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, glowtype);
-	//apex_mem.Write<int>(ptr + OFFSET_GLOW_THROUGH_WALLS, glowtype2);
-	// Color
-	//apex_mem.Write<float>(ptr + GLOW_COLOR_R, glowr);
-	//apex_mem.Write<float>(ptr + GLOW_COLOR_G, glowg);
-	//apex_mem.Write<float>(ptr + GLOW_COLOR_B, glowb);
 }
 void Entity::disableGlow()
 {
 	
-	apex_mem.Write<int>(ptr + OFFSET_GLOW_T1, 0);
-	apex_mem.Write<int>(ptr + OFFSET_GLOW_T2, 0);
-	apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, 2);
-	apex_mem.Write<int>(ptr + OFFSET_GLOW_THROUGH_WALLS, 5);
+	//apex_mem.Write<int>(ptr + OFFSET_GLOW_T1, 0);
+	//apex_mem.Write<int>(ptr + OFFSET_GLOW_T2, 0);
+	//apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, 2);
+	//apex_mem.Write<int>(ptr + OFFSET_GLOW_THROUGH_WALLS, 5);
 	//apex_mem.Write<float>(ptr + GLOW_COLOR_R, 0.0f);
 	//apex_mem.Write<float>(ptr + GLOW_COLOR_G, 0.0f);
 	//apex_mem.Write<float>(ptr + GLOW_COLOR_B, 0.0f);
