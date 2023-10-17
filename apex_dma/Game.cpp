@@ -414,31 +414,31 @@ QAngle CalculateBestBoneAim(Entity& from, uintptr_t t, float max_fov)
 		max_fov *= zoom_fov/90.0f;
 	}
 
-	/*
-	//simple aim prediction
-	if (BulletSpeed > 1.f)
-	{
-		Vector LocalBonePosition = from.getBonePosition(bone);
-		float VerticalTime = TargetBonePosition.DistTo(LocalBonePosition) / BulletSpeed;
-		TargetBonePosition.z += (BulletGrav * 0.5f) * (VerticalTime * VerticalTime);
-		float HorizontalTime = TargetBonePosition.DistTo(LocalBonePosition) / BulletSpeed;
-		TargetBonePosition += (target.getAbsVelocity() * HorizontalTime);
-	}
-	*/
+if (BulletSpeed > 1.f)
+{
 	
-	//more accurate prediction
-	if (BulletSpeed > 1.f)
-	{
-		PredictCtx Ctx;
-		Ctx.StartPos = LocalCamera;
-		Ctx.TargetPos = TargetBonePosition; 
-		Ctx.BulletSpeed = BulletSpeed - (BulletSpeed*smoothpred);
-		Ctx.BulletGravity = BulletGrav + (BulletGrav*smoothpred2);
-		Ctx.TargetVel = target.getAbsVelocity();
+    PredictCtx Ctx;
+    Ctx.StartPos = LocalCamera;
+    Ctx.TargetPos = TargetBonePosition; 
+	Ctx.BulletSpeed = BulletSpeed - (BulletSpeed*bulletspeed);
+	Ctx.BulletGravity = BulletGrav + (BulletGrav*bulletgrav);
 
-		if (BulletPredict(Ctx))
-			CalculatedAngles = QAngle{Ctx.AimAngles.x, Ctx.AimAngles.y, 0.f};
-    }
+    // Get the target's velocity and add it to the prediction context
+    Vector targetVel = target.getAbsVelocity();
+
+    // Calculate the time since the last frame (in seconds)
+    float deltaTime = 0.0133333;
+
+    // Add the target's velocity to the prediction context, with an offset in the y direction
+    float distanceToTarget = (TargetBonePosition - LocalCamera).Length();
+    float timeToTarget = distanceToTarget / BulletSpeed;
+    Vector targetPosAhead = TargetBonePosition + (targetVel * timeToTarget);
+    Ctx.TargetVel = Vector(targetVel.x, targetVel.y + (targetVel.Length() * deltaTime), targetVel.z);
+    Ctx.TargetPos = targetPosAhead;
+
+    if (BulletPredict(Ctx))
+        CalculatedAngles = QAngle{Ctx.AimAngles.x, Ctx.AimAngles.y, 0.f};
+}
 
 	if (CalculatedAngles == QAngle(0, 0, 0))
     	CalculatedAngles = Math::CalcAngle(LocalCamera, TargetBonePosition);
