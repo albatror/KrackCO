@@ -1,4 +1,5 @@
 #include "prediction.h"
+#include <array>
 
 extern Memory apex_mem;
 
