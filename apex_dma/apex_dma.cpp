@@ -46,6 +46,9 @@ float isattacing = 0.0f;
 //Firing Range 1v1 toggle
 bool onevone = false;
 
+extern float bulletspeed;
+extern float bulletgrav;
+
 //map
 int map = 0;
 
@@ -54,18 +57,28 @@ bool chargerifle = false;
 bool shooting = false;
 
 
-//Player Glow Color and Brightness. Just setting things up, dont edit.
-float glowr = 0.0f; //Red 0-255, higher is brighter color.
-float glowg = 120.0f; //Green 0-255, higher is brighter color.
-float glowb = 120.0f; //Blue 0-255, higher is brighter color.
-//visable
-float glowrviz = 0.0f; //Red 0-255, higher is brighter color.
-float glowgviz = 120.0f; //Green 0-255, higher is brighter color.
-float glowbviz = 120.0f; //Blue 0-255, higher is brighter color.
-//knocked
-float glowrknocked = 0.0f; //Red 0-255, higher is brighter color.
-float glowgknocked = 120.0f; //Green 0-255, higher is brighter color.
-float glowbknocked = 120.0f; //Blue 0-255, higher is brighter color.
+//Player Glow Color and Brightness.
+//inside fill
+unsigned char insidevalue = 14;  //0 = no fill, 14 = full fill
+//Outline size
+unsigned char outlinesize = 32; // 0-255
+//Not Visable 
+float glowrnot = 1; //Red 0-1, higher is brighter color.
+float glowgnot = 0; //Green 0-1, higher is brighter color.
+float glowbnot = 0; //Blue 0-1, higher is brighter color.
+//Visable
+float glowrviz = 0; //Red 0-1, higher is brighter color.
+float glowgviz = 1; //Green 0-1, higher is brighter color.
+float glowbviz = 0; //Blue 0-1, higher is brighter color.
+//Knocked
+float glowrknocked = 1; //Red 0-1, higher is brighter color.
+float glowgknocked = 1; //Green 0-1, higher is brighter color.
+float glowbknocked = 1; //Blue 0-1, higher is brighter color.
+//Item Configs
+//loot Fill
+unsigned char lootfilled = 14;  //0 no fill, 14 100% fill
+//loot outline siez
+unsigned char lootoutline = 0;
 
 
 //Removed but not all the way, dont edit.
@@ -250,41 +263,76 @@ int tmp_all_spec = 0, allied_spectators = 0;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+int glowtype3;
+int settingIndex;
+int contextId;
+std::array<float, 3> highlightParameter;
+//works
 void SetPlayerGlow(Entity& LPlayer, Entity& Target, int index)
 {
 	if (player_glow >= 1)
 	{
-		
-		
 			if (!Target.isGlowing() || (int)Target.buffer[OFFSET_GLOW_THROUGH_WALLS_GLOW_VISIBLE_TYPE] != 1) {
 				float currentEntityTime = 5000.f;
 				if (!isnan(currentEntityTime) && currentEntityTime > 0.f) {
-					GColor color;
-					
 					if (!(firing_range) && (Target.isKnocked() || !Target.isAlive()))
 					{
-						color = { glowrknocked, glowgknocked, glowbknocked };
+						contextId = 5;
+						settingIndex = 80;
+						highlightParameter = { glowrknocked, glowgknocked, glowbknocked };
 					}
 					else if (Target.lastVisTime() > lastvis_aim[index] || (Target.lastVisTime() < 0.f && lastvis_aim[index] > 0.f))
 					{
-						
-						color = { glowrviz, glowgviz, glowbviz };
+						contextId = 6;
+						settingIndex = 81;
+						highlightParameter = { glowrviz, glowgviz, glowbviz };
 					}
 					else 
 					{
-						color = { glowr, glowg, glowb };
+						contextId = 7;
+						settingIndex = 82;
+						highlightParameter = { glowrnot, glowgnot, glowbnot };
 					}
-
-					Target.enableGlow(color);
+					Target.enableGlow();
 				}
 			}
-		
-		else if((player_glow == 0) && Target.isGlowing())
-		{
-			Target.disableGlow();
-		}
 	}
+	else
+		{
+			if (!Target.isGlowing() || (int)Target.buffer[OFFSET_GLOW_THROUGH_WALLS_GLOW_VISIBLE_TYPE] != 1) {
+				float currentEntityTime = 5000.f;
+				if (!isnan(currentEntityTime) && currentEntityTime > 0.f) {
+					if (!(firing_range) && (Target.isKnocked() || !Target.isAlive()))
+					{
+						insidevalue = 0;  //0 = no fill, 14 = full fill
+						//Outline size
+						outlinesize = 0; // 0-255
+						contextId = 5;
+						settingIndex = 80;
+						highlightParameter = { 0, 0, 0 };
+					}
+					else if (Target.lastVisTime() > lastvis_aim[index] || (Target.lastVisTime() < 0.f && lastvis_aim[index] > 0.f))
+					{
+						insidevalue = 0;  //0 = no fill, 14 = full fill
+						//Outline size
+						outlinesize = 0; // 0-255
+						contextId = 6;
+						settingIndex = 81;
+						highlightParameter = { 0, 0, 0 };
+					}
+					else 
+					{
+						insidevalue = 0;  //0 = no fill, 14 = full fill
+						//Outline size
+						outlinesize = 0; // 0-255
+						contextId = 7;
+						settingIndex = 82;
+						highlightParameter = { 0, 0, 0 };
+					}
+					Target.enableGlow();
+				}
+			}
+		}
 }
 
 
