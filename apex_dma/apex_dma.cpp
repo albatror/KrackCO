@@ -68,7 +68,7 @@ bool TriggerBot = false;
 //Terminal Stuff
 bool lootfilledtoggle = true;
 bool playerfilledtoggle = true;
-bool SuperKeyToggle = true;
+//bool SuperKeyToggle = true;
 //end Terminal Stuff
 bool TDMToggle = false;
 bool item_glow = true; //item glow
@@ -5792,21 +5792,21 @@ void displayMainMenu()
 	std::cout << nonADSfov;
 	std::cout << ")" << std::endl;
 	
-	if (SuperKeyToggle)
-	{
-		std::cout << "15 - Super Glide Disabled" << std::endl;
-	}
-	else
-	{
-		std::cout << "15 - Super Glide Enabled" << std::endl;
-	}
-	std::cout << "16 - Item Filter Settings\n" << std::endl;
-	std::cout << "17 - Aiming Key One Setting" << std::endl;
-	std::cout << "18 - Aiming Key Two Setting" << std::endl;
-	std::cout << "19 - Triggerbot Key Setting\n" << std::endl;
+	//if (SuperKeyToggle)
+	//{
+	//	std::cout << "15 - Super Glide Disabled" << std::endl;
+	//}
+	//else
+	//{
+	//	std::cout << "15 - Super Glide Enabled" << std::endl;
+	//}
+	std::cout << "15 - Item Filter Settings\n" << std::endl;
+	std::cout << "16 - Aiming Key One Setting" << std::endl;
+	std::cout << "17 - Aiming Key Two Setting" << std::endl;
+	std::cout << "18 - Triggerbot Key Setting\n" << std::endl;
 	
-	std::cout << "20 - Save Settings" << std::endl;
-	std::cout << "21 - Load Settings\n" << std::endl;
+	std::cout << "19 - Save Settings" << std::endl;
+	std::cout << "20 - Load Settings\n" << std::endl;
     
 }
 
@@ -7692,14 +7692,14 @@ void terminal()
 				std::cin.clear();
 				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             }
-			if (option == 15)
-			{
+			//if (option == 15)
+			//{
                 //player Filled.
-				SuperKey = !SuperKey;
-				SuperKeyToggle = !SuperKeyToggle;
-            }
+				//SuperKey = !SuperKey;
+				//SuperKeyToggle = !SuperKeyToggle;
+            //}
 			
-            if (option == 16)
+            if (option == 15)
 			{
                 //  displayItemFilterMenu
                 menuLevel = 1;
@@ -7708,7 +7708,7 @@ void terminal()
 			
 			
 			
-			if (option == 17)
+			if (option == 16)
 			{
 				// Optionally print the key codes before updating
 				std::cout << "Do you want to see the key codes before updating? (1 for yes, 0 for no): ";
@@ -7741,7 +7741,7 @@ void terminal()
 				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			}
 
-			if (option == 18)
+			if (option == 17)
 			{
 				// Optionally print the key codes before updating
 				std::cout << "Do you want to see the key codes before updating? (1 for yes, 0 for no): ";
@@ -7773,7 +7773,7 @@ void terminal()
 				std::cin.clear();
 				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			}
-			if (option == 19)
+			if (option == 18)
 			{
 				// Optionally print the key codes before updating
 				std::cout << "Do you want to see the key codes before updating? (1 for yes, 0 for no): ";
@@ -7807,11 +7807,11 @@ void terminal()
 			}
 
 			
-			if (option == 20)
+			if (option == 19)
 			{
 				saveSettings();
             }
-			if (option == 21)
+			if (option == 20)
 			{
 				loadSettings(); 
             }
