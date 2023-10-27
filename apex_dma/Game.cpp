@@ -194,10 +194,22 @@ void Entity::enableGlow()
 	//std::array<float, 3> highlightParameter = { 0, 1, 0 };
 	apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, contextId);
 	apex_mem.Write<unsigned char>(ptr + OFFSET_HIGHLIGHTSERVERACTIVESTATES + contextId, settingIndex);
+	
+	apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, 1);
+	apex_mem.Write<unsigned char>(ptr + OFFSET_HIGHLIGHTSERVERACTIVESTATES + 1, settingIndex);
+
+	apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, 2);
+	apex_mem.Write<unsigned char>(ptr + OFFSET_HIGHLIGHTSERVERACTIVESTATES + 2, settingIndex);
+
+	apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, 3);
+	apex_mem.Write<unsigned char>(ptr + OFFSET_HIGHLIGHTSERVERACTIVESTATES + 3, settingIndex);
+
+	apex_mem.Write<int>(ptr + OFFSET_GLOW_ENABLE, 4);
+	apex_mem.Write<unsigned char>(ptr + OFFSET_HIGHLIGHTSERVERACTIVESTATES + 4, settingIndex);
 	//apex_mem.Write<int>(ptr + 0x298 + contextId, settingIndex);
 	long highlightSettingsPtr;
 	apex_mem.Read<long>(g_Base + HIGHLIGHT_SETTINGS, highlightSettingsPtr);
-    apex_mem.Write<int>(ptr + OFFSET_GLOW_THROUGH_WALLS , 2);
+    	apex_mem.Write<int>(ptr + OFFSET_GLOW_THROUGH_WALLS , 2);
 	apex_mem.Write<typeof(highlightFunctionBits)>(highlightSettingsPtr + HIGHLIGHT_TYPE_SIZE * settingIndex + 4, highlightFunctionBits);
 	apex_mem.Write<typeof(highlightParameter)>(highlightSettingsPtr + HIGHLIGHT_TYPE_SIZE * settingIndex + 8, highlightParameter);
 	apex_mem.Write(g_Base + 0x270 , 1);
