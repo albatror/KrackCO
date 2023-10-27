@@ -57,7 +57,7 @@ extern float bulletgrav;
 //CONFIG AREA, you must set all the true/false to what you want.
 //Enable Loading of setting file automaticly.
 bool LoadSettings = true;
-bool SuperKey = false;
+//bool SuperKey = false;
 //Gamepad or Keyboard config, Only one true at once or it wont work.
 bool keyboard = true;
 bool gamepad = false;
@@ -439,6 +439,11 @@ bool isPressed(uint32_t button_code)
 void ClientActions()
 {
 	cactions_t = true;
+	// Variables to store original values
+	int originalJumpValue = 0;
+	int originalDuckToggleValue = 0; 
+	int originalForceDuckValue = 0;
+	//
 	while (cactions_t)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -458,77 +463,69 @@ void ClientActions()
 			
 			int zoomState = 0;
 			apex_mem.Read<int>(g_Base + OFFSET_IN_ZOOM, zoomState); //109
-			int frameSleepTimer;
-			int lastFrameNumber;
-			bool superGlideStart;
-			int superGlideTimer;
-			int curFrameNumber;
-			float m_traversalProgressTmp = 0.0f;
-			apex_mem.Read<int>(g_Base + OFFSET_GLOBAL_VARS + 0x0008, curFrameNumber); // GlobalVars + 0x0008
-			float m_traversalProgress;
-			
-			apex_mem.Read<float>(LocalPlayer + OFFSET_TRAVERSAL_PROGRESS, m_traversalProgress);
-			//printf("Travel Time: %f\n", m_traversalProgress);
-			//printf("Frame Sleep Timer: %i\n", frameSleepTimer);
-			//printf("Last Frame: %i\n", lastFrameNumber);
-			//printf("Super Glide Timer: %i\n", superGlideTimer);
-			//printf("Last Frame: %i\n", lastFrameNumber);
-			//printf("Cur Frame: %i\n", curFrameNumber);
-			//printf("superGlideStart: %d\n", superGlideStart ? 1 : 0);
-			int jump;
-			int ducktoggle;
-			int forceduck;
-			//printf("Jump Value: %i\n", jump);
-			//printf("Toggle Jump: %i\n", ducktoggle);
-			//printf("Force Duck: %i\n", forceduck);
-			apex_mem.Read<int>(g_Base + OFFSET_FORCE_JUMP + 0x8, jump);
-			apex_mem.Read<int>(g_Base + OFFSET_IN_TOGGLE_DUCK + 0x8, ducktoggle);
-			apex_mem.Read<int>(g_Base + OFFSET_FORCE_DUCK + 0x8, forceduck);
-			//apex_mem.Write<int>(g_Base + OFFSET_FORCE_JUMP + 0x8, 4);
-			
-			if (curFrameNumber > lastFrameNumber)
-			{
-				frameSleepTimer = 10; // <- middle of the frame // needs 5 for 144fps and 10 for 75 fps
-			}
-			lastFrameNumber = curFrameNumber;
-			 
-			if (frameSleepTimer == 0)
-			{
-				if(SuperKey)
-				{
-					if (m_traversalProgress > 0.85 && m_traversalProgress < 0.92) // needs to end at 0.90 for 144 fps and 0.92 for 75 fps
-					{
-						superGlideStart = true;
-					}
-				 
-					if (superGlideStart)
-					{
-						superGlideTimer++;
-						//printf("Timer Started \n");
-						if (superGlideTimer == 5)
-						{
-							apex_mem.Write<int>(g_Base + OFFSET_FORCE_JUMP + 0x8, 5);
-						}
-						else if (superGlideTimer == 6)
-						{
-							apex_mem.Write<int>(g_Base + OFFSET_IN_TOGGLE_DUCK + 0x8, 6);
-						}
-						else if (superGlideTimer == 10) //needs to be 10 for 75 and 144fps?
-						{
-							apex_mem.Write<int>(g_Base + OFFSET_FORCE_JUMP + 0x8, 4);
-							apex_mem.Write<int>(g_Base + OFFSET_FORCE_DUCK + 0x8, 5);
-							apex_mem.Write<int>(g_Base + OFFSET_FORCE_DUCK + 0x8, 4);
-							m_traversalProgressTmp = m_traversalProgress;
-						}
-						else if (superGlideTimer > 10 && m_traversalProgress != m_traversalProgressTmp)
-						{
-							superGlideStart = false;
-							superGlideTimer = 0;
-						}
-					}
-				}
-			}
-			frameSleepTimer -= 1;
+int frameSleepTimer = 0;
+int lastFrameNumber = 0;
+bool superGlideStart = false;
+int superGlideTimer = 0;
+int curFrameNumber = 0;
+float m_traversalProgressTmp = 0.0f;
+float m_traversalProgress = 0.0f;
+
+int jump = 0;
+int ducktoggle = 0;
+int forceduck = 0;
+
+// Read necessary values
+apex_mem.Read<int>(g_Base + OFFSET_GLOBAL_VARS + 0x0008, curFrameNumber);
+apex_mem.Read<float>(LocalPlayer + OFFSET_TRAVERSAL_PROGRESS, m_traversalProgress);
+apex_mem.Read<int>(g_Base + OFFSET_FORCE_JUMP + 0x8, jump);
+apex_mem.Read<int>(g_Base + OFFSET_IN_TOGGLE_DUCK + 0x8, ducktoggle);
+apex_mem.Read<int>(g_Base + OFFSET_FORCE_DUCK + 0x8, forceduck);
+
+if (curFrameNumber > lastFrameNumber) {
+  frameSleepTimer = 10; // Use 10 for 75 FPS
+}
+
+lastFrameNumber = curFrameNumber;
+
+if (frameSleepTimer == 0) {
+
+  if (m_traversalProgress > 0.91 && m_traversalProgress < 0.93) {
+    superGlideStart = true;
+    
+    // Store original values
+    originalJumpValue = jump;
+    originalDuckToggleValue = ducktoggle;
+    originalForceDuckValue = forceduck;
+  }
+
+  if (superGlideStart) {
+    superGlideTimer++;
+
+    if (superGlideTimer == 5) {
+      apex_mem.Write<int>(g_Base + OFFSET_FORCE_JUMP + 0x8, 5);
+    
+    } else if (superGlideTimer == 6) {
+      apex_mem.Write<int>(g_Base + OFFSET_IN_TOGGLE_DUCK + 0x8, 6);
+    
+    } else if (superGlideTimer == 10) {
+      apex_mem.Write<int>(g_Base + OFFSET_FORCE_JUMP + 0x8, 4);
+      apex_mem.Write<int>(g_Base + OFFSET_FORCE_DUCK + 0x8, 5);
+      apex_mem.Write<int>(g_Base + OFFSET_FORCE_DUCK + 0x8, 4);
+      m_traversalProgressTmp = m_traversalProgress;
+    
+    } else if (superGlideTimer > 10 && m_traversalProgress != m_traversalProgressTmp) {
+      // Reset the player's state
+      apex_mem.Write<int>(g_Base + OFFSET_FORCE_JUMP + 0x8, originalJumpValue);
+      apex_mem.Write<int>(g_Base + OFFSET_IN_TOGGLE_DUCK + 0x8, originalDuckToggleValue);
+      apex_mem.Write<int>(g_Base + OFFSET_FORCE_DUCK + 0x8, originalForceDuckValue);
+      superGlideStart = false;
+      superGlideTimer = 0;
+    }
+  }
+}
+
+frameSleepTimer -= 1;
 			//printf("Minimap: %ld\n", minimap);
 			//apex_mem.Write(LocalPlayer + 0x270 , 1);
 			
